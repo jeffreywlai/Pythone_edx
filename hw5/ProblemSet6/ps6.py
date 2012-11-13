@@ -215,8 +215,64 @@ def filterStories(stories, triggerlist):
     Returns: a list of only the stories for which a trigger in triggerlist fires.
     """
     # TODO: Problem 10
-    # This is a placeholder (we're just returning all the stories, with no filtering) 
-    return stories
+def filterStories(stories, triggerlist):
+    """
+   Takes in a list of NewsStory instances.
+ 
+   Returns: a list of only the stories for which a trigger in triggerlist fires.
+   """
+    # TODO: Problem 10
+    # This is a placeholder (we're just returning all the stories, with no filtering)
+   
+    res = []
+    for story in stories:
+        for trigger in triggerlist:
+            if trigger.evaluate(story):
+                res.append(story)
+                break
+    return res
+class WordTrigger(Trigger):
+    def __init__(self, word):
+        self.word = word
+ 
+    def is_word_in(self, text):
+        word = self.word.lower()
+        text = text.lower()
+ 
+       
+        for punc in string.punctuation:
+            text = text.replace(punc, " ")
+        splittext = text.split(" ")
+ 
+       
+        return word in splittext
+ 
+ 
+class TitleTrigger(WordTrigger):
+   
+ 
+    def evaluate(self, story):
+        return self.is_word_in(story.getTitle())
+       
+class SubjectTrigger(WordTrigger):
+   
+ 
+    def evaluate(self, story):
+        return self.is_word_in(story.getSubject())
+   
+ 
+class SummaryTrigger(WordTrigger):
+   
+ 
+    def evaluate(self, story):
+        return self.is_word_in(story.getSummary())
+ 
+ 
+class PhraseTrigger(Trigger):
+    def __init__(self, pharse):
+        self.p=pharse
+    def evaluate (self, story):
+        return self.p in story.getTitle() or self.p in story.getSummary() or self.p in story.getSubject()
 
 #======================
 # Part 4
@@ -239,6 +295,28 @@ def makeTrigger(triggerMap, triggerType, params, name):
     Returns: None
     """
     # TODO: Problem 11
+    if triggerType == "TITLE":
+        trigger = TitleTrigger(params[0])
+ 
+    elif triggerType == "SUBJECT":
+        trigger = SubjectTrigger(params[0])
+ 
+    elif triggerType == "SUMMARY":
+        trigger = SummaryTrigger(params[0])
+ 
+    elif triggerType == "NOT":
+        trigger = NotTrigger(triggerMap[params[0]])
+ 
+    elif triggerType == "AND":
+        trigger = AndTrigger(triggerMap[params[0]], triggerMap[params[1]])
+ 
+    elif triggerType == "OR":
+        trigger = OrTrigger(triggerMap[params[0]], triggerMap[params[1]])
+ 
+    elif triggerType == "PHRASE":
+        trigger = PhraseTrigger(" ".join(params))
+    triggerMap[name] = trigger
+    return triggerMap[name]
 
 
 def readTriggerConfig(filename):
